@@ -1,12 +1,6 @@
 import streamlit as st
-from pymongo import MongoClient
 from Home import home
-
-MONGO_URI = "mongodb+srv://MoneyMap:W8Q2If6NZpW4DNU2@cluster0.vjlnd.mongodb.net/?retryWrites=true&w=majority"
-DB_NAME = "MoneyMap_database"
-client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
-users_login = db["users"]
+from database import users_collection
 
 if "authenticate" not in st.session_state:
     st.session_state["authenticate"] = False
@@ -47,13 +41,13 @@ def login():
         home()  
 
 def create_user(username, password):
-    if users_login.find_one({"username": username}):
+    if users_collection.find_one({"username": username}):
         st.warning("Username already exists!")
     else:
         users_data = {"username": username, "password": password}
-        users_login.insert_one(users_data)
+        users_collection.insert_one(users_data)
         st.success("Account created successfully!")
 
 def check_credentials(username, password) -> bool:
-    user = users_login.find_one({"username": username, "password": password})
+    user = users_collection.find_one({"username": username, "password": password})
     return bool(user)
