@@ -9,4 +9,4 @@ def home():
           add_bank_statement()
     elif menu=="add transactions":
          add_transaction()
-         
+    
