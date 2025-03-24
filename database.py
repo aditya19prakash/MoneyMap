@@ -1,8 +1,5 @@
 import os
 from pymongo import MongoClient
-from dotenv import load_dotenv
-
-load_dotenv()
 MONGO_URI="mongodb+srv://MoneyMap:W8Q2If6NZpW4DNU2@cluster0.vjlnd.mongodb.net/?retryWrites=true&w=majority"
 DB_NAME="MoneyMap_database"
 
