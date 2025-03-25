@@ -13,8 +13,6 @@ def login():
         col1, col2, col3 = st.columns([0.5, 2, 0.5])
         with col2:
             tab1, tab2 = st.tabs(["Sign In", "Sign Up"])
-            
-           
             with tab1:
                 username = st.text_input("Username")
                 password = st.text_input("Password", type="password")
@@ -25,8 +23,6 @@ def login():
                         st.success("Login Success")
                     else:
                         st.error("Invalid username or password")
-
-           
             with tab2:
                 new_username = st.text_input("New Username")
                 new_password = st.text_input("New Password", type="password")
