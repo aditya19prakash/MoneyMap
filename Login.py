@@ -21,6 +21,7 @@ def login():
                         st.session_state["authenticate"] = True 
                         st.session_state["username"] = username
                         st.success("Login Success")
+                        st.rerun()
                     else:
                         st.error("Invalid username or password")
             with tab2:
