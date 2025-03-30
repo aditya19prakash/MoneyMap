@@ -20,9 +20,12 @@ def add_bank_statement():
            df.drop(columns=["Ref No./Cheque No.","Value Date"],inplace=True)
            desired_order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit", "Balance"]
            df=df[desired_order]
-           if st.button("show Uploaded Transaction"):
+           if st.button():
+             toggle_state = st.toggle("show Uploaded Transaction")
+           if toggle_state:
              st.write(df)
-
+           else:
+              st.warning("The button is OFF ❌")
        except Exception as e:
            st.write(e)
    
