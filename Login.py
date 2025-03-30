@@ -35,6 +35,10 @@ def login():
                         create_user(new_username, new_password)
 
     else:
+        with col3:
+            if st.button("Logout", key="logout"):
+                st.session_state.clear()
+                st.markdown("<meta http-equiv='refresh' content='0; url=''>", unsafe_allow_html=True)
         home()  
 
 def create_user(username, password):
@@ -48,3 +52,4 @@ def create_user(username, password):
 def check_credentials(username, password) -> bool:
     user = users_collection.find_one({"username": username, "password": password})
     return bool(user)
+
