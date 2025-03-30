@@ -7,7 +7,12 @@ if "authenticate" not in st.session_state:
 
 if "username" not in st.session_state:
     st.session_state["username"] = None
-
+col1,col2=st.columns([0.5,0.5])
+if st.session_state["authenticate"]==True:
+  with col2:
+   if st.button("Logout", key="logout"):
+      st.session_state.clear()
+      st.markdown("<meta http-equiv='refresh' content='0; url=''>", unsafe_allow_html=True)
 def login():
     if not st.session_state["authenticate"]:
         col1, col2, col3 = st.columns([0.5, 2, 0.5])
