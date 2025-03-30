@@ -11,16 +11,13 @@ if "username" not in st.session_state:
 def login():
     if not st.session_state["authenticate"]:
         col1, col2, col3 = st.columns([0.5, 2, 0.5])
-        if st.session_state["authenticate"]==True:
-         with col3:
-          if st.button("Logout", key="logout"):
-             st.session_state.clear()
-             st.markdown("<meta http-equiv='refresh' content='0; url=''>", unsafe_allow_html=True)
+        
         with col2:
             tab1, tab2 = st.tabs(["Sign In", "Sign Up"])
             with tab1:
                 username = st.text_input("Username")
                 password = st.text_input("Password", type="password")
+                
                 if st.button("Login", use_container_width=True):
                     if check_credentials(username, password):
                         st.session_state["authenticate"] = True 
@@ -33,13 +30,21 @@ def login():
                 new_username = st.text_input("New Username")
                 new_password = st.text_input("New Password", type="password")
                 confirm_password = st.text_input("Confirm Password", type="password")
+                
                 if st.button("Create Account", use_container_width=True):
                     if new_password != confirm_password:
                         st.warning("Passwords do not match")
                     else:
                         create_user(new_username, new_password)
+
     else:
-     home()  
+        col1, col2, col3 = st.columns([0.5, 2, 0.5])
+        with col3:
+            if st.button("Logout", key="logout"):
+                st.session_state.clear()
+                st.rerun() 
+
+        home() 
 
 def create_user(username, password):
     if users_collection.find_one({"username": username}):
@@ -52,4 +57,5 @@ def create_user(username, password):
 def check_credentials(username, password) -> bool:
     user = users_collection.find_one({"username": username, "password": password})
     return bool(user)
+
 
