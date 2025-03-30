@@ -33,13 +33,13 @@ def login():
                         st.warning("Passwords do not match")
                     else:
                         create_user(new_username, new_password)
-
     else:
-        with col3:
-            if st.button("Logout", key="logout"):
-                st.session_state.clear()
-                st.markdown("<meta http-equiv='refresh' content='0; url=''>", unsafe_allow_html=True)
-        home()  
+     col1,col2=st.columns([0.5,0.5])
+     with col1:
+        if st.button("Logout", key="logout"):
+         st.session_state.clear()
+         st.markdown("<meta http-equiv='refresh' content='0; url=''>", unsafe_allow_html=True)
+     home()  
 
 def create_user(username, password):
     if users_collection.find_one({"username": username}):
