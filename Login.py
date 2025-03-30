@@ -35,7 +35,7 @@ def login():
                         create_user(new_username, new_password)
     else:
      col1,col2=st.columns([0.5,0.5])
-     with col1:
+     with col2:
         if st.button("Logout", key="logout"):
          st.session_state.clear()
          st.markdown("<meta http-equiv='refresh' content='0; url=''>", unsafe_allow_html=True)
