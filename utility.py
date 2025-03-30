@@ -15,18 +15,19 @@ def add_bank_statement():
            df["Debit"] = pd.to_numeric(df["Debit"], errors='coerce')
            df["Credit"] = pd.to_numeric(df["Credit"], errors='coerce')
            df["Balance"] = pd.to_numeric(df["Balance"], errors='coerce')
-           df['Account Name'] = df['Description'].apply(extract_name_after_third_slash)
+           df['Account Name'] = df['Description'].apply(extract_name)
            df.dropna(thresh=df.shape[1] - 3, inplace=True) 
            df.drop(columns=["Ref No./Cheque No.","Value Date"],inplace=True)
            desired_order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit", "Balance"]
            df=df[desired_order]
-           st.write(df)
+           if st.button("show Uploaded Transaction"):
+             st.write(df)
+
        except Exception as e:
            st.write(e)
    
    
-def extract_name_after_third_slash(description):
-    """Extracts a name from the given description string after the third slash, or sets to 'Debit Card' or 'Credit Card'."""
+def extract_name(description):
     if not isinstance(description, str):
         return "Unknown"
     if 'DEBIT CARD' in description.upper():
