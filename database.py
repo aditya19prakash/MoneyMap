@@ -9,3 +9,8 @@ if not MONGO_URI or not DB_NAME:
 client = MongoClient(MONGO_URI)  
 db = client[DB_NAME] 
 users_collection = db["users"] 
+
+users_collection.update_one(
+    {"username": "aditya"},
+    {"$unset": {"transactions": ""}}
+)

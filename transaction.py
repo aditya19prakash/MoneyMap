@@ -28,8 +28,8 @@ def add_transaction():
             "payment_method": payment_method,
             "date": date.strftime("%d-%m-%y"),
             "description": description
-        }
-
+        } 
+        a=["Txn Date", 'Account Name',"Category", "Description", "Debit", "Credit","Payment Method"]
         users_collection.update_one(
             {"username":st.session_state["username"]},
             {"$push": {"transactions": transaction_data}},
@@ -44,7 +44,7 @@ def show_transactions():
 
     username = st.session_state["username"]
     user = users_collection.find_one({"username": username}, {"transactions": 1, "_id": 0})
-
+   
     if not user or "transactions" not in user:
         st.info("No transactions found!")
     else:
