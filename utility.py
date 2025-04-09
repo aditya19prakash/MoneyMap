@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-
+from database import users_collection
 def add_bank_statement():
    uploader= st.file_uploader("add your bank statement in excel format",type=["xls","xlsx"])
    if uploader != None:
@@ -17,18 +17,31 @@ def add_bank_statement():
            df["Credit"] = pd.to_numeric(df["Credit"], errors='coerce')
            df['Account Name'] = df['Description'].apply(extract_name)
            df['Payment Method'] =df['Description'].apply(extract_payment_method)
+           df['Category'] =df["Account Name"].apply(extract_category)
            df.dropna(thresh=df.shape[1] - 1, inplace=True) 
-           order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit","Payment Method"]
+           order = ["Txn Date", 'Account Name','Category' "Description", "Debit", "Credit","Payment Method"]
            df=df[order]
            df.reset_index(drop=True, inplace=True)
            col1,col2 = st.columns([1,1])
+           with col1:
+               if st.button("Save Transaction"):
+                   save_transaction()
            with col2:
              toggle_state = st.toggle("show Uploaded Transaction")
            if toggle_state:
             st.write(df)
        except Exception as e:
            st.write(e)
-   
+def save_transaction():
+    pass
+def extract_category(name):
+    if not isinstance(name, str):
+        return "Uncategorized"
+    result = users_collection.find_one({"name":name})
+    if result and "category" in result:
+        return result["category"]
+    return "Uncategorized"
+
 def extract_payment_method(description):
     if not isinstance(description, str):
         return "Unknown"

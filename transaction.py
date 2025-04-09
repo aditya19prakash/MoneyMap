@@ -11,7 +11,7 @@ def add_transaction():
         credit = st.text_input("Credit")
       else:
         debit = st.text_input("Debit")
-      category = st.selectbox("Category",["Income", "Money Transfer", "Investment", "Savings", "Loan", "Bills", "Other"])
+      category = st.selectbox("Category",["Income", "Money Transfer", "Investment","Groceries","Food & Drinks","Shopping","EMI", "Bills", "Other"])
       if category=="Other":
          category=st.text_input("Enter the category name")
       payment_method = st.selectbox("Payment Method", ["Cash", "UPI", "Credit Card", "Debit Card", "Bank Transfer"])
