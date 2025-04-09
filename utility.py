@@ -24,8 +24,8 @@ def add_bank_statement():
            col1,col2 = st.columns([1,1])
            with col2:
              toggle_state = st.toggle("show Uploaded Transaction")
-             if toggle_state:
-              st.write(df)
+           if toggle_state:
+            st.write(df)
        except Exception as e:
            st.write(e)
    
