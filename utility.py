@@ -20,6 +20,7 @@ def add_bank_statement():
            order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit"]
            df=df[order]
            df.reset_index(drop=True, inplace=True)
+           df.drop(rows=0)
            toggle_state = st.toggle("show Uploaded Transaction")
            if toggle_state:
              st.write(df)
