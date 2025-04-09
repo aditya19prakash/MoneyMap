@@ -25,15 +25,21 @@ def add_bank_statement():
            col1,col2 = st.columns([1,1])
            with col1:
                if st.button("Save Transaction"):
-                   save_transaction()
+                   save_transaction(df)
            with col2:
              toggle_state = st.toggle("show Uploaded Transaction")
            if toggle_state:
             st.write(df)
        except Exception as e:
            st.write(e)
-def save_transaction():
-    pass
+def save_transaction(df):
+    records = df.to_dict('records')
+    users_collection.update_one(
+            {"username":st.session_state["username"]},
+            {"$push": {"transactions": records}},
+            upsert=True
+        )
+    st.success("Transactions saved successfully!")
 def extract_category(name):
     if not isinstance(name, str):
         return "Uncategorized"
