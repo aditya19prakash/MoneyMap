@@ -16,7 +16,7 @@ def add_bank_statement():
            df["Debit"] = pd.to_numeric(df["Debit"], errors='coerce')
            df["Credit"] = pd.to_numeric(df["Credit"], errors='coerce')
            df['Account Name'] = df['Description'].apply(extract_name)
-           df.dropna(thresh=df.shape[1] - 3, inplace=True) 
+           df.dropna(thresh=df.shape[1] - 1, inplace=True) 
            order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit"]
            df=df[order]
            df.reset_index(drop=True, inplace=True)
