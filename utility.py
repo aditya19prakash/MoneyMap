@@ -19,7 +19,7 @@ def add_bank_statement():
            df['Payment Method'] =df['Description'].apply(extract_payment_method)
            df['Category'] =df["Account Name"].apply(extract_category)
            df.dropna(thresh=df.shape[1] - 1, inplace=True) 
-           order = ["Txn Date", 'Account Name','Category' "Description", "Debit", "Credit","Payment Method"]
+           order = ["Txn Date", 'Account Name',"Category", "Description", "Debit", "Credit","Payment Method"]
            df=df[order]
            df.reset_index(drop=True, inplace=True)
            col1,col2 = st.columns([1,1])
