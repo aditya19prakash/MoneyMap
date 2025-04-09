@@ -6,8 +6,12 @@ def add_transaction():
     col1, col2 = st.columns(2)
     with col1:
       account_name = st.text_input("Account Name")
-      amount = st.text_input("Amount")
-      category = st.selectbox("Category",["Income", "Send Money", "Investment", "Savings", "Loan", "Bills", "Other"])
+      transaction_type=st.radio("choose transaction type",("Credit","Debit"))
+      if transaction_type == "Credit":
+        credit = st.text_input("Credit")
+      else:
+        debit = st.text_input("Debit")
+      category = st.selectbox("Category",["Income", "Money Transfer", "Investment", "Savings", "Loan", "Bills", "Other"])
       if category=="Other":
          category=st.text_input("Enter the category name")
       payment_method = st.selectbox("Payment Method", ["Cash", "UPI", "Credit Card", "Debit Card", "Bank Transfer"])
@@ -18,7 +22,8 @@ def add_transaction():
     if st.button("Save Transaction"):
         transaction_data = {
             "account_name": account_name,
-            "amount": int(amount),
+            "credit": int(credit),
+            "debit": int(debit),
             "category": category,
             "payment_method": payment_method,
             "date": date.strftime("%d-%m-%y"),
