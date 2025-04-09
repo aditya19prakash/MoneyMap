@@ -6,7 +6,7 @@ def add_bank_statement():
    if uploader != None:
        try:
            if uploader.name.endswith(".xlsx"):
-                df = pd.read_excel(uploader, engine="openpyxl") 
+                df = pd.read_excel(uploader, engine="openpyxl", skiprows=19) 
            else:
                 df = pd.read_excel(uploader, engine="xlrd")
            df = df.iloc[:, :6]
@@ -19,6 +19,7 @@ def add_bank_statement():
            df.dropna(thresh=df.shape[1] - 3, inplace=True) 
            order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit"]
            df=df[order]
+           df.reset_index(drop=True, inplace=True)
            toggle_state = st.toggle("show Uploaded Transaction")
            if toggle_state:
              st.write(df)
