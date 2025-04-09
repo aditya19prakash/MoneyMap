@@ -33,14 +33,11 @@ def add_bank_statement():
        except Exception as e:
            st.write(e)
 def save_transaction(df):
-    # Convert date to datetime and handle NaN values
-    df['Txn Date'] = pd.to_datetime(df['Txn Date'])
     df = df.where(pd.notnull(df), None)
     records = df.to_dict('records')
-    # Convert datetime to string format
     for record in records:
         if record['Txn Date']:
-            record['Txn Date'] = record['Txn Date'].strftime('%Y-%m-%d')
+            record['Txn Date'] = record['Txn Date'].strftime('%d-%m-%y')
     users_collection.update_one(
         {"username": st.session_state["username"]},
         {"$push": {"transactions": {"$each": records}}},

@@ -11,6 +11,6 @@ db = client[DB_NAME]
 users_collection = db["users"] 
 
 # users_collection.update_one(
-#     {"username": "aditya"},
-#     {"$unset": {"transactions": ""}}
-# )
+#      {"username": "aditya"},
+#      {"$unset": {"transactions": ""}}
+#  )
