@@ -16,18 +16,34 @@ def add_bank_statement():
            df["Debit"] = pd.to_numeric(df["Debit"], errors='coerce')
            df["Credit"] = pd.to_numeric(df["Credit"], errors='coerce')
            df['Account Name'] = df['Description'].apply(extract_name)
+           df['Payment Method'] =df['Description'].apply(extract_payment_method)
            df.dropna(thresh=df.shape[1] - 1, inplace=True) 
-           order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit"]
+           order = ["Txn Date", 'Account Name', "Description", "Debit", "Credit","Payment Method"]
            df=df[order]
            df.reset_index(drop=True, inplace=True)
-           #df.drop(0,inplace=True)
            toggle_state = st.toggle("show Uploaded Transaction")
            if toggle_state:
              st.write(df)
        except Exception as e:
            st.write(e)
    
-   
+def extract_payment_method(description):
+    if not isinstance(description, str):
+        return "Unknown"
+    if 'UPI' in description.upper():
+        return "UPI" 
+    elif 'CDM SERVICE CHARGES' in description.upper():
+        return "Service Charges"
+    elif 'CDM' in description.upper():
+        return "Money Transfer"
+    elif 'CHEQUE' in description.upper():
+        return "Cheque"
+    elif 'ATM' in description.upper():
+        return "ATM"
+    elif 'NEFT'in description.upper():
+        return "NEFT"
+    elif 'IMPS'in description.upper():
+        return "IMPS"  
 def extract_name(description):
     if not isinstance(description, str):
         return "Unknown"
