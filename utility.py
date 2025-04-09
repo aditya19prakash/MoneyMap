@@ -33,12 +33,13 @@ def add_bank_statement():
        except Exception as e:
            st.write(e)
 def save_transaction(df):
+    df = df.where(pd.notnull(df), None)  # Convert NaN to None
     records = df.to_dict('records')
     users_collection.update_one(
-            {"username":st.session_state["username"]},
-            {"$push": {"transactions": records}},
-            upsert=True
-        )
+        {"username": st.session_state["username"]},
+        {"$push": {"transactions": {"$each": records}}},
+        upsert=True
+    )
     st.success("Transactions saved successfully!")
 def extract_category(name):
     if not isinstance(name, str):
