@@ -30,8 +30,8 @@ def add_transaction():
             return
         transaction_data = {
             'Account Name': account_name,
-            "Credit": int(credit) if transaction_type == "Credit" and credit else 0,
-           "Debit": int(debit) if transaction_type == "Debit" and debit else 0,
+            "Credit": int(credit) if transaction_type == "Credit" and credit else None,
+           "Debit": int(debit) if transaction_type == "Debit" and debit else None,
             "Category": category,
            "Payment Method": payment_method,
             "Txn Date": date.strftime("%d-%m-%y"),
