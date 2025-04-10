@@ -36,10 +36,14 @@ def add_bank_statement():
             st.write(df)
        except Exception as e:
            st.write(e)
+
+
 def convert_integer(data):
-    if data == None:
+    if pd.isna(data):
         return None
     return int(data)
+
+
 def extract_transc_id(description):
     description=str(description)
     parts = description.split('/')
@@ -49,9 +53,19 @@ def extract_transc_id(description):
     random.seed(now)
     rand_num = random.randint(1, 1000000)
     return int(rand_num)
+
+
 def save_transaction(df):
     df = df.where(pd.notnull(df), None)
+    users_collection.find_one()
     records = df.to_dict('records')
+    existing_user = users_collection.find_one({"username": st.session_state["username"]})
+    if existing_user and "transactions" in existing_user:
+        existing_ids = set(t["Id"] for t in existing_user["transactions"])
+        records = [r for r in records if r["Id"] not in existing_ids]
+    if not records:
+        st.warning("All transactions already exist in database!")
+        return
     for record in records:
         if record['Txn Date']:
             record['Txn Date'] = record['Txn Date'].strftime('%d-%m-%y')
