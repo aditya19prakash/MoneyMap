@@ -10,7 +10,7 @@ client = MongoClient(MONGO_URI)
 db = client[DB_NAME] 
 users_collection = db["users"] 
 
-users_collection.update_one(
-     {"username": "aditya"},
-     {"$unset": {"transactions": ""}}
- )
+# users_collection.update_one(
+#      {"username": "aditya"},
+#      {"$unset": {"transactions": ""}}
+#  )
