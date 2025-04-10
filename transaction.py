@@ -1,5 +1,7 @@
+from datetime import datetime
 import streamlit as st
 from database import users_collection
+import random
 
 
 
@@ -28,7 +30,11 @@ def add_transaction():
         if not account_name or not category or not payment_method or not date or not description:
             st.warning("Please provide all required fields to proceed.")
             return
+        now = int(datetime.datetime.now().timestamp())
+        random.seed(now)
+        rand_num = random.randint(1, 1000000)
         transaction_data = {
+            'Id': rand_num,
             'Account Name': account_name,
             "Credit": int(credit) if transaction_type == "Credit" and credit else None,
            "Debit": int(debit) if transaction_type == "Debit" and debit else None,
@@ -46,15 +52,26 @@ def add_transaction():
         st.success("Transaction saved successfully!")
 
 def show_transactions():
-    """Show Transactions from User's Document"""
     if "username" not in st.session_state:
         st.warning("Please log in first!")
         return
-
-    username = st.session_state["username"]
-    user = users_collection.find_one({"username": username}, {"transactions": 1, "_id": 0})
-   
-    if not user or "transactions" not in user:
+    col1,col2=st.columns([1,1])
+    with col1:
+     start_date = st.date_input("Start Date")
+    with col2:
+     end_date = st.date_input("End Date") 
+    if st.button("Show Transcation"):
+      username = st.session_state["username"]
+      user = users_collection.find_one({"username": username}, {"transactions": 1, "_id": 0})
+      filtered_data=[]
+      if not user or "transactions" not in user or user["transactions"] is None:
         st.info("No transactions found!")
-    else:
-        st.table(user["transactions"])  
+      else:
+        for transaction in user["transactions"]:
+          txn_date = datetime.strptime(transaction['Txn Date'], "%d-%m-%y").date()
+          if start_date <= txn_date <= end_date:
+              filtered_data.append(transaction)
+        if filtered_data==[]:
+            st.info("No transactions found!")
+        else:
+              st.table(filtered_data)  

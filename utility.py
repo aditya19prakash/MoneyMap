@@ -1,3 +1,6 @@
+import datetime
+import random
+from bson import ObjectId
 import streamlit as st
 import pandas as pd
 from database import users_collection
@@ -13,13 +16,14 @@ def add_bank_statement():
            df.columns = ["Txn Date", "Value Date", "Description", "Ref No./Cheque No.", "Debit", "Credit"]
            df.drop(columns=["Ref No./Cheque No.","Value Date"],inplace=True)
            df["Txn Date"] = pd.to_datetime(df["Txn Date"], errors='coerce').dt.date
-           df["Debit"] = pd.to_numeric(df["Debit"], errors='coerce')
-           df["Credit"] = pd.to_numeric(df["Credit"], errors='coerce')
+           df["Debit"] = pd.to_numeric(df["Debit"], errors='coerce').apply(convert_integer)
+           df["Credit"] = pd.to_numeric(df["Credit"], errors='coerce').apply(convert_integer)
            df['Account Name'] = df['Description'].apply(extract_name)
            df['Payment Method'] =df['Description'].apply(extract_payment_method)
            df['Category'] =df["Account Name"].apply(extract_category)
+           df['Id'] = df['Description'].apply(extract_transc_id)
            df.dropna(thresh=df.shape[1] - 1, inplace=True) 
-           order = ["Txn Date", 'Account Name',"Category", "Description", "Debit", "Credit","Payment Method"]
+           order = ['Id',"Txn Date", 'Account Name',"Category", "Description", "Debit", "Credit","Payment Method"]
            df=df[order]
            df.reset_index(drop=True, inplace=True)
            col1,col2 = st.columns([1,1])
@@ -32,6 +36,19 @@ def add_bank_statement():
             st.write(df)
        except Exception as e:
            st.write(e)
+def convert_integer(data):
+    if data == None:
+        return None
+    return int(data)
+def extract_transc_id(description):
+    description=str(description)
+    parts = description.split('/')
+    if len(parts) > 2:
+        return parts[2].strip() 
+    now = int(datetime.datetime.now().timestamp())
+    random.seed(now)
+    rand_num = random.randint(1, 1000000)
+    return int(rand_num)
 def save_transaction(df):
     df = df.where(pd.notnull(df), None)
     records = df.to_dict('records')
