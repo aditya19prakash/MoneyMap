@@ -25,23 +25,18 @@ def add_transaction():
         description = st.text_area("Description")
     
     if st.button("Save Transaction"):
-        # Check for empty fields
         if not account_name or not category or not payment_method or not date or not description:
             st.warning("Please provide all required fields to proceed.")
             return
-        
-        # Handle Credit/Debit inputs based on transaction type
         transaction_data = {
-            "account_name": account_name,
-            "credit": int(credit) if transaction_type == "Credit" and credit else 0,
-            "debit": int(debit) if transaction_type == "Debit" and debit else 0,
-            "category": category,
-            "payment_method": payment_method,
-            "date": date.strftime("%d-%m-%y"),
-            "description": description
+            'Account Name': account_name,
+            "Credit": int(credit) if transaction_type == "Credit" and credit else 0,
+           "Debit": int(debit) if transaction_type == "Debit" and debit else 0,
+            "Category": category,
+           "Payment Method": payment_method,
+            "Txn Date": date.strftime("%d-%m-%y"),
+            "Description": description
         }
-        
-        # Update the transaction in the database
         a = ["Txn Date", 'Account Name', "Category", "Description", "Debit", "Credit", "Payment Method"]
         users_collection.update_one(
             {"username": st.session_state["username"]},
