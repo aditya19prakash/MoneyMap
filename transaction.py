@@ -29,6 +29,10 @@ def add_transaction():
             "date": date.strftime("%d-%m-%y"),
             "description": description
         } 
+        if credit==None and debit==None:
+            st.warning("Please provide all required fields to proceed.")
+        elif account_name == None or category == None or payment_method == None or date == None or description== None:
+            st.warning("Please provide all required fields to proceed.")
         a=["Txn Date", 'Account Name',"Category", "Description", "Debit", "Credit","Payment Method"]
         users_collection.update_one(
             {"username":st.session_state["username"]},
