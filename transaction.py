@@ -20,14 +20,13 @@ def add_transaction():
         description = st.text_area("Description")
        
     if st.button("Save Transaction"):
-        if credit==None and debit==None:
+        if account_name == None or category == None or payment_method == None or date == None or description== None:
             st.warning("Please provide all required fields to proceed.")
-        elif account_name == None or category == None or payment_method == None or date == None or description== None:
-            st.warning("Please provide all required fields to proceed.")
+            return
         transaction_data = {
             "account_name": account_name,
-            "credit": int(credit),
-            "debit": int(debit),
+            "credit": int(credit) if transaction_type == "Credit" else 0,
+            "debit": int(debit) if transaction_type == "Debit" else 0,
             "category": category,
             "payment_method": payment_method,
             "date": date.strftime("%d-%m-%y"),
