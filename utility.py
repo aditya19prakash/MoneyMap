@@ -75,6 +75,10 @@ def save_transaction(df):
         upsert=True
     )
     st.success("Transactions saved successfully!")
+
+
+
+
 def extract_category(name):
     if not isinstance(name, str):
         return "Uncategorized"
@@ -82,6 +86,8 @@ def extract_category(name):
     if result and "category" in result:
         return result["category"]
     return "Uncategorized"
+
+
 
 def extract_payment_method(description):
     if not isinstance(description, str):
@@ -100,6 +106,9 @@ def extract_payment_method(description):
         return "NEFT"
     elif 'IMPS'in description.upper():
         return "IMPS"  
+    
+
+    
 def extract_name(description):
     if not isinstance(description, str):
         return "Unknown"
