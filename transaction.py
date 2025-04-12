@@ -27,7 +27,7 @@ def add_transaction():
         if not account_name or not category or not payment_method or not date or not description:
             st.warning("Please provide all required fields to proceed.")
             return
-        now = int(datetime.now().timestamp())
+        now = int(datetime.datetime.now().timestamp())
         random.seed(now)
         rand_num = random.randint(1, 1000000)
         transaction_data = {
