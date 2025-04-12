@@ -18,7 +18,7 @@ def add_transaction():
         if category == "Other":
             category = st.text_input("Enter the category name")
         payment_method = st.selectbox("Payment Method", ["Cash", "UPI", "Credit Card", "Debit Card", "Bank Transfer"])
-    
+
     with col2:
         date = st.date_input("Date")
         description = st.text_area("Description")
