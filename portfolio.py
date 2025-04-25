@@ -41,8 +41,3 @@ def Portfolio():
      st.write("Transactions for", month_1_start.strftime("%B %Y"), "to", month_1_end.strftime("%B %Y"), ":", monthly_data_month1)
 
     #return monthly_data_month1, monthly_data_month2, monthly_data_month3
-
-if "username" in st.session_state:
-    month1_transactions, month2_transactions, month3_transactions = portfolio()
-else:
-    st.warning("Please log in to view your portfolio.")
