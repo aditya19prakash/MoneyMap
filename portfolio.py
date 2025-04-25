@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 today = date.today()
 three_months_ago = today - relativedelta(months=3)
 
-def portfolio():
+def Portfolio():
     username = st.session_state["username"]
     if st.button("click"): 
      today = date.today()
