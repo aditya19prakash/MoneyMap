@@ -77,6 +77,7 @@ else:
         with col3:
             if st.button("Logout", key="logout"):
                 st.session_state.clear()
+                st.rerun()
         home()
     except Exception as e:
         st.error(f"Error in logout process: {str(e)}")
