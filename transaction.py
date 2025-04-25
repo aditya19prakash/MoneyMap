@@ -40,7 +40,6 @@ def add_transaction():
             "Txn Date": date.strftime("%d-%m-%y"),
             "Description": description
         }
-        a = ["Txn Date", 'Account Name', "Category", "Description", "Debit", "Credit", "Payment Method"]
         users_collection.update_one(
             {"username": st.session_state["username"]},
             {"$push": {"transactions": transaction_data}},

@@ -6,17 +6,17 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 import calendar
 
-def extract_amount(records):
+def extract_amount(records, transaction_type="Debit"):
     total = 0
     for record in records:
         try:
-            if "Debit" in record and record["Debit"]:
-                debit_value = record["Debit"]
-                if pd.isna(debit_value) or debit_value == "nan" or debit_value == "":
+            if transaction_type in record and record[transaction_type]:
+                value = record[transaction_type]
+                if pd.isna(value) or value == "nan" or value == "":
                     continue
-                total += float(debit_value)
+                total += float(value)
         except Exception as e:
-            st.warning(f"Error processing record {record.get('Id', 'unknown')}: {e}")
+            st.warning(f"Error processing record {record.get('Id', 'unknown')} for {transaction_type}: {e}")
     return total
 
 def portfolio():
@@ -29,11 +29,13 @@ def portfolio():
         last_day = calendar.monthrange(target.year, target.month)[1]
         end = date(target.year, target.month, last_day)
         return start, end
+
     m3_start, m3_end = get_month_range(3)
     m2_start, m2_end = get_month_range(2)
     m1_start, m1_end = get_month_range(1)
     current_start = date(today.year, today.month, 1)
     current_end = today
+
     month_ranges = [
         (m3_start.strftime("%b %Y"), m3_start, m3_end),
         (m2_start.strftime("%b %Y"), m2_start, m2_end),
@@ -57,48 +59,64 @@ def portfolio():
             except ValueError:
                 st.error(f"Could not parse date: {txn_date_str} in record: {record.get('Id', 'N/A')}")
 
-    amounts = [extract_amount(month_data[month]) for month in month_data]
     month_labels = list(month_data.keys())
+    debit_amounts = [extract_amount(month_data[month], "Debit") for month in month_data]
+    credit_amounts = [extract_amount(month_data[month], "Credit") for month in month_data]
+
+    df = pd.DataFrame({
+        'Month': month_labels,
+        'Debit': debit_amounts,
+        'Credit': credit_amounts
+    })
 
     fig = px.bar(
-     x=month_labels,
-     y=amounts,
-     labels={'x': 'Month', 'y': 'Amount Spent'},
-     title='Monthly Spending Overview',
-     text=[f'₹{int(amount):,}' for amount in amounts],
-     category_orders={"x": month_labels}
-)
+        df,
+        x='Month',
+        y=['Debit', 'Credit'],
+        labels={'Month': 'Month', 'value': 'Amount', 'variable': 'Transaction Type'},
+        title='Monthly Spending and Income Overview',
+        text_auto=True,
+        category_orders={"Month": month_labels}
+    )
 
     fig.update_traces(
-     selector=dict(type='bar'),
-     marker_color='rgb(158,202,225)',
-     marker_line_color='rgb(8,48,107)',
-     marker_line_width=1.5,
-     opacity=0.8,
-     width=0.3,  # Decreased the width of the bars
-)
-    fig.update_layout(
-     width=800,
-     height=500,
-     font=dict(size=16),
-     title_font_size=32,
-     plot_bgcolor='rgba(0,0,0,0)',
-     paper_bgcolor='rgba(0,0,0,0)',
-     xaxis=dict(
-          showgrid=False,
-          showline=True,
-          linecolor='rgb(204, 204, 204)',
-          linewidth=0.8,
-          tickfont=dict(size=20)
-     ),
-     yaxis=dict(
-          showgrid=True,
-          gridcolor='rgb(204, 204, 204)',
-          showline=True,
-          linecolor='rgb(204, 204, 204)',
-          linewidth=0.8,
-          tickfont=dict(size=20)
-     )
-)
+        width=0.3,
+        opacity=0.8,
+        textfont_size=12,
+        textangle=0,
+        textposition="outside",
+    )
 
+    fig.update_layout(
+        width=800,
+        height=500,
+        font=dict(size=16),
+        title_font_size=32,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(
+            showgrid=False,
+            showline=True,
+            linecolor='rgb(204, 204, 204)',
+            linewidth=0.8,
+            tickfont=dict(size=20)
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor='rgb(204, 204, 204)',
+            showline=True,
+            linecolor='rgb(204, 204, 204)',
+            linewidth=0.8,
+            tickfont=dict(size=20)
+        ),
+        legend=dict(
+            title="Transaction Type",
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
+    )
     st.plotly_chart(fig, use_container_width=True)
+

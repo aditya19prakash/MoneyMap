@@ -25,7 +25,7 @@ try:
 except Exception as e:
     st.error(f"Error setting page config: {str(e)}")
 
-st.markdown("<h1 style='text-align: center; color: white;'>Money Mapper</h1>", unsafe_allow_html=True)
+st.write("<h1 style='text-align: center;'>Money Mapper</h1>", unsafe_allow_html=True)
 
 if not st.session_state["authenticated"]:
     try:
@@ -49,12 +49,16 @@ if not st.session_state["authenticated"]:
                 username = st.text_input("Username")
                 password = st.text_input("Password", type="password")
                 if st.button("Login", use_container_width=True):
-                    if check_credentials(username, password):
-                        st.session_state["authenticated"] = True
-                        st.session_state["username"] = username
-                        st.rerun()
+                    if not username or username.isspace() or ' ' in username or password == None:
+                        st.error("Username cannot be empty or contain spaces")
                     else:
-                        st.error("Invalid credentials")
+                        if check_credentials(username, password):
+                            st.session_state["authenticated"] = True
+                            st.session_state["username"] = username
+                            st.rerun()
+                        else:
+                            st.error("Invalid credentials")
+    
             with tab2:
                 new_username = st.text_input("New Username")
                 new_password = st.text_input("New Password", type="password")
