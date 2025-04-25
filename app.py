@@ -14,6 +14,7 @@ def create_user(username, password):
         users_collection.insert_one(users_data)
         st.success("Account created successfully!")
 
+
 def check_credentials(username, password) -> bool:
     user = users_collection.find_one({"username": username, "password": password})
     return bool(user)
