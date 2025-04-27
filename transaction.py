@@ -129,4 +129,6 @@ def show_transactions():
             st.info(f"No transactions found for account '{selected_account}'.")
 
 def format_amount(amount):
-    return amount
+    if pd.isna(amount):
+        return ""
+    return int(amount)
