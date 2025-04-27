@@ -129,13 +129,4 @@ def show_transactions():
             st.info(f"No transactions found for account '{selected_account}'.")
 
 def format_amount(amount):
-    try:
-        if amount is None or amount == "":
-            return ""
-        amount = float(str(amount).replace(',', '').strip())
-        if amount.is_integer():
-            return str(int(amount))
-        else:
-            return f"{amount:.2f}"
-    except:
-        return amount
+    return amount
