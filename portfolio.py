@@ -5,6 +5,8 @@ from database import users_collection
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import calendar
+from sklearn.linear_model import LinearRegression
+
 
 def extract_amount(records, transaction_type="Debit"):
     total = 0
@@ -18,6 +20,7 @@ def extract_amount(records, transaction_type="Debit"):
         except Exception as e:
             st.warning(f"Error processing record {record.get('Id', 'unknown')} for {transaction_type}: {e}")
     return total
+
 
 def portfolio():
     username = st.session_state["username"]
@@ -122,4 +125,44 @@ def portfolio():
         )
     )
     st.plotly_chart(fig, use_container_width=True)
+    existing_records = users_collection.find_one({"username": username})
+    if not existing_records or "transactions" not in existing_records:
+        st.warning("No transactions found for this user.")
+        return
 
+    transactions = existing_records["transactions"]
+
+    # Prepare data
+    df = pd.DataFrame(transactions)
+    df['Txn Date'] = pd.to_datetime(df['Txn Date'], format='%d-%m-%y')
+    df['Year'] = df['Txn Date'].dt.year
+
+    if 'Debit' not in df.columns or 'Category' not in df.columns:
+        st.error("Required fields (Debit or Category) missing in transactions.")
+        return
+
+    df['Amount'] = df['Debit'].fillna(0)
+
+    available_years = sorted(df['Year'].unique(), reverse=True)
+    selected_year = st.selectbox("Select Year", available_years)
+
+    filtered_df = df[df['Year'] == selected_year]
+
+    # Group by category
+    category_summary = filtered_df.groupby('Category').agg({
+        'Amount': 'sum'
+    }).reset_index().sort_values('Amount', ascending=False)
+
+    if category_summary.empty:
+        st.info(f"No spending records found for {selected_year}.")
+        return
+
+    # Plot
+    st.subheader(f"💰 Spending by Category for {selected_year}")
+    fig = px.pie(
+        category_summary,
+        values='Amount',
+        names='Category',
+        title=f'Spending Distribution for {selected_year}'
+    )
+    st.plotly_chart(fig, use_container_width=True)
