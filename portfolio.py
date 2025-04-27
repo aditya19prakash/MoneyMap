@@ -5,7 +5,6 @@ from database import users_collection
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import calendar
-from sklearn.linear_model import LinearRegression
 
 
 def extract_amount(records, transaction_type="Debit"):
