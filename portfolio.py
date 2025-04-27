@@ -45,6 +45,9 @@ def portfolio():
     month_data = {label: [] for label, _, _ in month_ranges}
 
     existing_records = users_collection.find_one({"username": username})
+    if not existing_records or "transactions" not in existing_records:
+        st.warning("No transactions found for this user.")
+        return
     transactions = existing_records["transactions"]
 
     for record in transactions:
