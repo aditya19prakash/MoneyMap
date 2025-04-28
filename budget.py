@@ -28,7 +28,7 @@ def budget():
         df['year'] = df['date'].dt.year
         df['debit'] = pd.to_numeric(df['Debit'], errors='coerce').fillna(0)
         df['credit'] = pd.to_numeric(df['Credit'], errors='coerce').fillna(0)
-        df['amount'] = df['debit']  # For budget, focus on debits (spending)
+        df['amount'] = df['debit'] 
         df['category'] = df.get('Category', 'Uncategorized').str.lower().str.strip()
 
         years = sorted(df['year'].unique().tolist(), reverse=True)
