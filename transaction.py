@@ -109,10 +109,15 @@ def show_transactions():
             st.info("No transactions found for the selected dates!")
 
     st.markdown("---")
-
     st.header("View Transactions by Account Name")
     account_names = list({txn.get('Account Name', 'Unknown') for txn in transactions})
     selected_account = st.selectbox("Select Account", account_names)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        acc_start_date = st.date_input("Start Date (Account)")
+    with col2:
+        acc_end_date = st.date_input("End Date (Account)")
 
     filtered_by_account = []
 
@@ -123,13 +128,23 @@ def show_transactions():
                 "Credit": format_amount(txn.get("Credit")),
                 "Debit": format_amount(txn.get("Debit"))
             }
-            for txn in transactions if txn.get("Account Name") == selected_account
+            for txn in transactions 
+            if txn.get("Account Name") == selected_account 
+            and acc_start_date <= datetime.strptime(txn["Txn Date"], "%d-%m-%y").date() <= acc_end_date
         ]
         if filtered_by_account:
             st.table(filtered_by_account)
             df = pd.DataFrame(filtered_by_account)
+            df['Id'] = df['Id'].astype(str)  # Convert Id column to string
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("Download CSV (Account)", data=csv, file_name="transactions_by_account.csv", mime="text/csv")
+            # Calculate total credit and debit
+            total_credit = sum(txn.get("Credit", 0) or 0 for txn in filtered_by_account)
+            total_debit = sum(txn.get("Debit", 0) or 0 for txn in filtered_by_account)
+            
+            st.write(f"For account '{selected_account}' between {acc_start_date} and {acc_end_date}:")
+            st.write(f"Total Credit: ₹{total_credit:,}")
+            st.write(f"Total Debit: ₹{total_debit:,}")
         else:
             st.info(f"No transactions found for account '{selected_account}'.")
 
