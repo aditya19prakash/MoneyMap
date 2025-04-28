@@ -131,10 +131,7 @@ def portfolio():
     if not existing_records or "transactions" not in existing_records:
         st.warning("No transactions found for this user.")
         return
-
     transactions = existing_records["transactions"]
-
-    # Prepare data
     df = pd.DataFrame(transactions)
     df['Txn Date'] = pd.to_datetime(df['Txn Date'], format='%d-%m-%y')
     df['Year'] = df['Txn Date'].dt.year

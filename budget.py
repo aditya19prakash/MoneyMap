@@ -51,7 +51,7 @@ def budget():
             {"username": st.session_state["username"], "budget": {"$exists": True}},
             {"budget": 1}
         )
-        existing_budgets = budget_record.get("budget", {}).get(f"{selected_year}_{selected_month}", {})
+        existing_budgets = budget_record.get("budget", {}).get(f"{selected_year}_{selected_month}", {}) if budget_record else {}
 
         category_totals = current_df.groupby('category')['amount'].sum()
 
