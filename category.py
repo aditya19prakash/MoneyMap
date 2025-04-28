@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from database import users_collection
 from datetime import datetime
-
+from utility import check_internet_connection
 def extract_category(name):
     if not isinstance(name, str):
         return "Uncategorized"
@@ -13,7 +13,9 @@ def extract_category(name):
 
 def categorised():
     st.markdown("<h2 style='color: white;'>Categorise Transactions by Account Name</h2>", unsafe_allow_html=True)
-
+    if not check_internet_connection():
+        st.error("No internet connection. Please check your connection and try again.")
+        return None
     username = st.session_state.get("username")
     if not username:
         st.warning("Please log in to categorise transactions.")
@@ -65,7 +67,6 @@ def categorised():
                     updated_transaction['Category'] = new_category
                     updated_transactions.append(updated_transaction)
                     if row['Account Name'] not in unique_categorised_names:
-                        # Save the category for this Account Name using "name" field
                         account_name = updated_transaction.get('Account Name')
                         existing_account = users_collection.find_one({"name": account_name})
                         if not existing_account:
@@ -82,8 +83,9 @@ def categorised():
                 {"$set": {"transactions": updated_transactions}}
             )
             st.success(f"Successfully categorised {categorised_count} transactions for the selected Account Names to '{new_category}' and saved the mapping(s) for future use.")
-            st.rerun() # Refresh to show updated categories
+            st.rerun() 
 
+            
     st.subheader("Spending by Category")
     category_spending = transactions_df[transactions_df['Debit'] > 0].groupby('Category')['Debit'].sum().reset_index()
     if not category_spending.empty:

@@ -1,12 +1,16 @@
 import streamlit as st
 from Home import home
 from database import users_collection
+from utility import check_internet_connection
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 if "username" not in st.session_state:
     st.session_state["username"] = None
 
 def create_user(username, password):
+    if not check_internet_connection():
+      st.error("No internet connection. Please check your connection and try again.")
+      return None
     if users_collection.find_one({"username": username}):
         st.warning("Username already exists!")
     else:
@@ -16,6 +20,9 @@ def create_user(username, password):
 
 
 def check_credentials(username, password) -> bool:
+    if not check_internet_connection():
+     st.error("No internet connection. Please check your connection and try again.")
+     return None
     user = users_collection.find_one({"username": username, "password": password})
     return bool(user)
 

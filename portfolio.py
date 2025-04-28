@@ -5,7 +5,7 @@ from database import users_collection
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import calendar
-
+from utility import check_internet_connection
 
 def extract_amount(records, transaction_type="Debit"):
     total = 0
@@ -22,6 +22,9 @@ def extract_amount(records, transaction_type="Debit"):
 
 
 def portfolio():
+    if not check_internet_connection():
+        st.error("No internet connection. Please check your connection and try again.")
+        return None
     username = st.session_state["username"]
     today = date.today()
 
@@ -45,7 +48,7 @@ def portfolio():
         (current_start.strftime("%b %Y"), current_start, current_end)
     ]
     month_data = {label: [] for label, _, _ in month_ranges}
-
+    
     existing_records = users_collection.find_one({"username": username})
     if not existing_records or "transactions" not in existing_records:
         st.warning("No transactions found for this user.")

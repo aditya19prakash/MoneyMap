@@ -4,10 +4,13 @@ import pandas as pd
 import streamlit as st
 from datetime import datetime
 from database import users_collection
-
+from utility import check_internet_connection
 def budget():
     st.markdown("<h3 style='color: white;'>Budget</h3>", unsafe_allow_html=True)
     try:
+        if not check_internet_connection():
+            st.error("No internet connection. Please check your connection and try again.")
+            return None
         user_data = users_collection.find_one({"username": st.session_state["username"]})
         if not user_data or "transactions" not in user_data:
             st.warning("No transaction data available.")
@@ -128,8 +131,10 @@ def budget():
                 except ValueError:
                     st.error(f"Invalid input for {category}. Using default value.")
                     budget_settings[category] = default_value
-
+ 
             if st.button("Save Budget"):
+                if not check_internet_connection():
+                    return
                 budget_key = f"budget.{selected_year}_{selected_month}"
                 users_collection.update_one(
                     {"username": st.session_state["username"]},

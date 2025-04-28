@@ -6,17 +6,17 @@ from budget import budget
 from category import categorised
 def home():
     menu=st.sidebar.selectbox(
-        "Navigation",["add transactions","Show Transactions","add Bank Statement","portfolio","Budget","categorised"]
+        "Navigation",["Add transactions","Show Transactions","Add Bank Statement","Portfolio","Budget","Categorised"]
     )
-    if menu=="add Bank Statement":
+    if menu=="Add Bank Statement":
         add_bank_statement()
-    elif menu=="add transactions":
+    elif menu=="Add transactions":
         add_transaction()
     elif menu=="Show Transactions":
         show_transactions()
-    elif menu =="portfolio":
+    elif menu =="Portfolio":
         portfolio()
     elif menu=="Budget":
         budget()
-    elif menu =="categorised":
+    elif menu =="Categorised":
         categorised()

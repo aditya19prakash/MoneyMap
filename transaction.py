@@ -3,9 +3,12 @@ import streamlit as st
 from database import users_collection
 import random
 import pandas as pd
+from utility import check_internet_connection
 def add_transaction():
     st.markdown("<h2 style='color: white;'>Add Transaction</h2>", unsafe_allow_html=True)
-    
+    if not check_internet_connection():
+        st.error("No internet connection. Please check your connection and try again.")
+        return None
     col1, col2 = st.columns(2)
     
     with col1:
@@ -67,7 +70,9 @@ def show_transactions():
     if "username" not in st.session_state:
         st.warning("Please log in first!")
         return
-
+    if not check_internet_connection():
+        st.error("No internet connection. Please check your connection and try again.")
+        return None
     username = st.session_state["username"]
     user = users_collection.find_one({"username": username}, {"transactions": 1, "_id": 0})
 
@@ -85,7 +90,7 @@ def show_transactions():
         end_date = st.date_input("End Date")
 
     filtered_by_date = []
-
+       
     if st.button("Filter by Date"):
         for txn in transactions:
             txn_date = datetime.strptime(txn["Txn Date"], "%d-%m-%y").date()

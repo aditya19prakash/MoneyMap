@@ -3,7 +3,8 @@ import random
 import streamlit as st
 import pandas as pd
 from database import users_collection
-
+import socket
+import logging
 def add_bank_statement():
    uploader= st.file_uploader("add your bank statement in excel format",type=["xls","xlsx"])
    if uploader != None:
@@ -120,3 +121,12 @@ def extract_name(description):
     if len(parts) > 3:
         return parts[3].strip()  
     return "Unknown"
+
+def check_internet_connection():
+    """Checks internet connectivity by trying to connect to Google over port 443."""
+    try:
+        socket.create_connection(("www.google.com", 443), timeout=5)
+        return True
+    except OSError as e:
+        logging.error(f"Error in check_internet_connection: {e}")
+        return False
