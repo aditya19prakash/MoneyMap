@@ -5,12 +5,15 @@ import streamlit as st
 from datetime import datetime
 from database import users_collection
 from utility import check_internet_connection
+
+
 def budget():
     st.markdown("<h3 style='color: white;'>Budget</h3>", unsafe_allow_html=True)
     try:
         if not check_internet_connection():
             st.error("No internet connection. Please check your connection and try again.")
             return None
+
         user_data = users_collection.find_one({"username": st.session_state["username"]})
         if not user_data or "transactions" not in user_data:
             st.warning("No transaction data available.")
@@ -28,7 +31,7 @@ def budget():
         df['year'] = df['date'].dt.year
         df['debit'] = pd.to_numeric(df['Debit'], errors='coerce').fillna(0)
         df['credit'] = pd.to_numeric(df['Credit'], errors='coerce').fillna(0)
-        df['amount'] = df['debit'] 
+        df['amount'] = df['debit']
         df['category'] = df.get('Category', 'Uncategorized').str.lower().str.strip()
 
         years = sorted(df['year'].unique().tolist(), reverse=True)
@@ -37,6 +40,7 @@ def budget():
         if not years:
             st.warning("No data available")
             return
+
         selected_year = st.selectbox("Select Year", years, index=0 if not years else len(years) - 1)
         selected_month = st.selectbox("Select Month", unique_months, index=0)
 
@@ -70,12 +74,25 @@ def budget():
             lambda x: 'Within Budget' if x >= 0 else 'Exceeding Budget'
         )
         budget_overview['Remaining'] = budget_overview['Remaining'].astype(int)
+
         st.write(f"### Budget Overview for {selected_month} {selected_year}")
         st.table(budget_overview.round(2))
+
+        csv = budget_overview.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Download Budget Table as CSV",
+            data=csv,
+            file_name=f'budget_overview_{selected_month}_{selected_year}.csv',
+            mime='text/csv'
+        )
+
         st.write("### Budget Usage")
         budget_overview['Color'] = budget_overview['Status'].map({'Within Budget': 'green', 'Exceeding Budget': 'red'})
+
         charts_per_row = 2
         categories = budget_overview['Category'].unique()
+        figs = []
+
         for i in range(0, len(categories), charts_per_row):
             cols = st.columns(charts_per_row)
             for j in range(charts_per_row):
@@ -88,7 +105,7 @@ def budget():
                         color=['Spent', 'Remaining'],
                         color_discrete_map={'Spent': row['Color'], 'Remaining': 'lightgray'},
                         hole=0.5,
-                        title=f"{row['Category']} Budget Usage<br><sub>Status: {row['Status']}</sub>"
+                        title=f" {row['Category'].title()} Budget Usage<br><sub>Status: {row['Status']}</sub>"
                     )
 
                     fig.update_traces(
@@ -109,6 +126,7 @@ def budget():
                         height=350
                     )
                     cols[j].plotly_chart(fig)
+              
 
         if is_current_period:
             st.write("### Set Budget")
@@ -131,7 +149,7 @@ def budget():
                 except ValueError:
                     st.error(f"Invalid input for {category}. Using default value.")
                     budget_settings[category] = default_value
- 
+
             if st.button("Save Budget"):
                 if not check_internet_connection():
                     return
