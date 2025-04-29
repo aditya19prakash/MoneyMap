@@ -77,14 +77,16 @@ def budget():
 
         st.write(f"### Budget Overview for {selected_month} {selected_year}")
         st.table(budget_overview.round(2))
-
-        csv = budget_overview.to_csv(index=False).encode('utf-8')
-        st.download_button(
+        if budget_overview.empty:
+           pass
+        else:
+            csv = budget_overview.to_csv(index=False).encode('utf-8')
+            st.download_button(
             label="Download Budget Table as CSV",
             data=csv,
             file_name=f'budget_overview_{selected_month}_{selected_year}.csv',
             mime='text/csv'
-        )
+            )
 
         st.write("### Budget Usage")
         budget_overview['Color'] = budget_overview['Status'].map({'Within Budget': 'green', 'Exceeding Budget': 'red'})
