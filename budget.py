@@ -35,7 +35,7 @@ def budget():
         df['category'] = df.get('Category', 'Uncategorized').str.lower().str.strip()
 
         years = sorted(df['year'].unique().tolist(), reverse=True)
-        unique_months = sorted(df['month'].unique().tolist(), key=lambda m: datetime.strptime(m, '%B').month)
+        unique_months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
         if not years:
             st.warning("No data available")
