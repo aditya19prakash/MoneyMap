@@ -102,6 +102,12 @@ def show_transactions():
 
         if filtered_by_date:
             st.table(filtered_by_date)
+            total_credit = sum(txn.get("Credit", 0) or 0 for txn in filtered_by_date)
+            total_debit = sum(txn.get("Debit", 0) or 0 for txn in filtered_by_date)
+            
+            st.write(f"Transaction between {start_date} and {end_date}:")
+            st.write(f"Total Credit: ₹{total_credit:,}")
+            st.write(f"Total Debit: ₹{total_debit:,}")
             df = pd.DataFrame(filtered_by_date)
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("Download CSV", data=csv, file_name="transactions.csv", mime="text/csv")
