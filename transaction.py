@@ -101,7 +101,7 @@ def show_transactions():
                 filtered_by_date.append(clean_txn)
 
         if filtered_by_date:
-            filtered_by_dat = sorted(filtered_by_date, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
+            filtered_by_date = sorted(filtered_by_date, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
             st.table(filtered_by_date)
             total_credit = sum(txn.get("Credit", 0) or 0 for txn in filtered_by_date)
             total_debit = sum(txn.get("Debit", 0) or 0 for txn in filtered_by_date)
