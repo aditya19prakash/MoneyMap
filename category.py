@@ -14,7 +14,6 @@ def extract_category(name):
     if result and "category" in result:
         return result["category"]
     return "Uncategorized"
-
 def categorised():
     st.markdown("<h2 style='color: white;'>Categorise Transactions by Account Name</h2>", unsafe_allow_html=True)
 
@@ -38,6 +37,31 @@ def categorised():
         st.warning("Missing required columns in transaction data.")
         return
 
+    # ----------------------- [1] Rename Account Name -----------------------
+    with st.expander("✏️ Rename Account Name"):
+        account_names = transactions_df['Account Name'].dropna().unique().tolist()
+        selected_name = st.selectbox("Select Account Name to Rename", account_names)
+        new_name = st.text_input("Enter New Account Name")
+
+        if st.button("🔁 Rename"):
+            if selected_name and new_name and selected_name != new_name:
+                transactions_df.loc[transactions_df["Account Name"] == selected_name, "Account Name"] = new_name
+                users_collection.update_one(
+                    {"username": username},
+                    {"$set": {"transactions": transactions_df.to_dict("records")}}
+                )
+                # Update name in category mapping
+                if users_collection.find_one({"name": selected_name}):
+                    users_collection.update_one(
+                        {"name": selected_name},
+                        {"$set": {"name": new_name}}
+                    )
+                st.success(f"Renamed '{selected_name}' to '{new_name}' in all transactions.")
+                st.rerun()
+            else:
+                st.warning("Invalid or duplicate name entered.")
+
+    # ----------------------- [2] Uncategorised Transactions -----------------------
     uncategorised_df = transactions_df[transactions_df['Category'] == 'Uncategorized'].copy()
 
     if not uncategorised_df.empty:
@@ -48,10 +72,7 @@ def categorised():
                 "Select Account Names to categorise",
                 uncategorised_df['Account Name'].unique().tolist()
             )
-            new_category = st.selectbox(
-                "Select new category",
-                CATEGORY_OPTIONS
-            )
+            new_category = st.selectbox("Select new category", CATEGORY_OPTIONS)
             if new_category == "Other":
                 new_category = st.text_input("Enter custom category")
 
@@ -61,23 +82,16 @@ def categorised():
                 else:
                     st.warning("Please select account names and a category.")
 
+    # ----------------------- [3] Update Existing Categories -----------------------
     with st.expander("🔄 Update Existing Account Name Categories"):
         all_account_names = transactions_df['Account Name'].dropna().unique().tolist()
 
-        selected_account_name = st.selectbox(
-            "Select Account Name to Update",
-            all_account_names,
-            key="update_select_account"
-        )
+        selected_account_name = st.selectbox("Select Account Name to Update", all_account_names, key="update_select_account")
         if st.button("🔍 Check Current Category"):
             previous_category = extract_category(selected_account_name)
             st.info(f"Previous Category: {previous_category}")
 
-        new_category_update = st.selectbox(
-            "Select New Category",
-            CATEGORY_OPTIONS,
-            key="update_select_category"
-        )
+        new_category_update = st.selectbox("Select New Category", CATEGORY_OPTIONS, key="update_select_category")
         if new_category_update == "Other":
             new_category_update = st.text_input("Enter custom new category")
 
@@ -87,16 +101,17 @@ def categorised():
             else:
                 st.warning("Please select an account and a new category.")
 
+    # ----------------------- [4] Spending Summary -----------------------
     st.subheader("Spending by Category")
     category_spending = transactions_df[transactions_df['Debit'] > 0].groupby('Category')['Debit'].sum().reset_index()
     if not category_spending.empty:
         category_spending["Debit"] = category_spending["Debit"].apply(format_amount)
         st.table(category_spending.rename(columns={'Debit': 'Total Spent'}))
-        df = pd.DataFrame(category_spending)
-        csv = df.to_csv(index=False).encode('utf-8')
+        csv = category_spending.to_csv(index=False).encode('utf-8')
         st.download_button("Download CSV", data=csv, file_name="transactions.csv", mime="text/csv")
     else:
         st.info("No spending data available.")
+
 
 def update_transactions(transactions_df, username, account_names, new_category, force_update=False):
     updated_transactions = []
