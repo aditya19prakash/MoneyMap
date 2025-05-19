@@ -111,7 +111,8 @@ def show_transactions():
             st.write(f"Total Debit: ₹{total_debit:,}")
             df = pd.DataFrame(filtered_by_date)
             csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("Download CSV", data=csv, file_name="transactions.csv", mime="text/csv")
+            file_name=f"transactions_{start_date}_to_{end_date}.csv"
+            st.download_button("Download CSV", data=csv, file_name=file_name, mime="text/csv")
         else:
             st.info("No transactions found for the selected dates!")
 
@@ -145,7 +146,7 @@ def show_transactions():
             df = pd.DataFrame(filtered_by_account)
             df['Id'] = df['Id'].astype(str)  # Convert Id column to string
             csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("Download CSV (Account)", data=csv, file_name="transactions_by_account.csv", mime="text/csv")
+            st.download_button("Download CSV (Account)", data=csv, file_name=f"{selected_account}transaction.csv", mime="text/csv")
             # Calculate total credit and debit
             total_credit = sum(txn.get("Credit", 0) or 0 for txn in filtered_by_account)
             total_debit = sum(txn.get("Debit", 0) or 0 for txn in filtered_by_account)
