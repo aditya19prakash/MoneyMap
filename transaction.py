@@ -101,8 +101,8 @@ def show_transactions():
                 filtered_by_date.append(clean_txn)
 
         if filtered_by_date:
-            sorted_txns = sorted(filtered_by_date, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
-            st.table(sorted_txns)
+            filtered_by_dat = sorted(filtered_by_date, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
+            st.table(filtered_by_date)
             total_credit = sum(txn.get("Credit", 0) or 0 for txn in filtered_by_date)
             total_debit = sum(txn.get("Debit", 0) or 0 for txn in filtered_by_date)
             
@@ -140,8 +140,8 @@ def show_transactions():
             and acc_start_date <= datetime.strptime(txn["Txn Date"], "%d-%m-%y").date() <= acc_end_date
         ]
         if filtered_by_account:
-            sorted_txns_account = sorted(filtered_by_account, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
-            st.table(sorted_txns_account)
+            filtered_by_account = sorted(filtered_by_account, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
+            st.table(filtered_by_account)
             df = pd.DataFrame(filtered_by_account)
             df['Id'] = df['Id'].astype(str)  # Convert Id column to string
             csv = df.to_csv(index=False).encode('utf-8')
