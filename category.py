@@ -64,29 +64,29 @@ def categorised():
                 else:
                     st.warning("Please select account names and a category.")
 
-            # 🔄 AI Suggestion Preview
-            if st.button("🤖 Suggest Categories with AI"):
-              model = train_model(transactions_df.to_dict("records"))
-              if account_names_to_categorise:
-                  first_account = account_names_to_categorise[0]
-                  predicted_category = predict_category(
-                      model,
-                      first_account,
-                      0,  
-                      0,
-            ""
-                  )
-                  st.session_state["predicted_category"] = predicted_category
-                  st.success(f"🤖 AI Suggestion: {predicted_category}")
-                  if st.button("💾 Save AI Suggestions to Transactions"):
-                    if "predicted_category" in st.session_state and account_names_to_categorise:
-                      new_category = st.session_state["predicted_category"]
-                      update_transactions(transactions_df, username, account_names_to_categorise, new_category)
-                      del st.session_state["predicted_category"]
-                      time.sleep(1.5)
-                      st.rerun()
-                    else:
-                      st.warning("No AI suggestion found or no account names selected.")
+            # # 🔄 AI Suggestion Preview
+            # if st.button("🤖 Suggest Categories with AI"):
+            #   model = train_model(transactions_df.to_dict("records"))
+            #   if account_names_to_categorise:
+            #       first_account = account_names_to_categorise[0]
+            #       predicted_category = predict_category(
+            #           model,
+            #           first_account,
+            #           0,  
+            #           0,
+            # ""
+            #       )
+            #       st.session_state["predicted_category"] = predicted_category
+            #       st.success(f"🤖 AI Suggestion: {predicted_category}")
+            #       if st.button("💾 Save AI Suggestions to Transactions"):
+            #         if "predicted_category" in st.session_state and account_names_to_categorise:
+            #           new_category = st.session_state["predicted_category"]
+            #           update_transactions(transactions_df, username, account_names_to_categorise, new_category)
+            #           del st.session_state["predicted_category"]
+            #           time.sleep(1.5)
+            #           st.rerun()
+            #         else:
+            #           st.warning("No AI suggestion found or no account names selected.")
            
 
                
