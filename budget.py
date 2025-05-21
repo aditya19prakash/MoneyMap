@@ -94,80 +94,75 @@ def budget():
         charts_per_row = 2
         categories = budget_overview['Category'].unique()
         figs = []
-        # Filter out 'money transfer' transactions
-        current_df = current_df[~current_df['category'].str.contains('money transfer', case=False, na=False)]
 
         for i in range(0, len(categories), charts_per_row):
             cols = st.columns(charts_per_row)
             for j in range(charts_per_row):
-             if i + j < len(categories):
-                category = categories[i + j]
-                # Skip money transfer category
-                if 'money transfer' in category.lower():
-                 continue
-                row = budget_overview[budget_overview['Category'] == category].iloc[0]
-                fig = px.pie(
-                names=['Spent', 'Remaining'],
-                values=[row['Spent'], max(0, row['Remaining'])],
-                color=['Spent', 'Remaining'],
-                color_discrete_map={'Spent': row['Color'], 'Remaining': 'lightgray'},
-                hole=0.5,
-                title=f" {row['Category'].title()} Budget Usage<br><sub>Status: {row['Status']}</sub>"
-                )
-
-                fig.update_traces(
-                hovertemplate='%{label}: %{value}<extra></extra>'
-                )
-                fig.update_layout(
-                annotations=[
-                    dict(
-                    text=f"<b>{row['Category']}</b>",
-                    x=0.5,
-                    y=0.5,
-                    font_size=14,
-                    showarrow=False
+                if i + j < len(categories):
+                    category = categories[i + j]
+                    row = budget_overview[budget_overview['Category'] == category].iloc[0]
+                    fig = px.pie(
+                        names=['Spent', 'Remaining'],
+                        values=[row['Spent'], max(0, row['Remaining'])],
+                        color=['Spent', 'Remaining'],
+                        color_discrete_map={'Spent': row['Color'], 'Remaining': 'lightgray'},
+                        hole=0.5,
+                        title=f" {row['Category'].title()} Budget Usage<br><sub>Status: {row['Status']}</sub>"
                     )
-                ],
-                showlegend=False,
-                width=350,
-                height=350
-                )
-                cols[j].plotly_chart(fig)
+
+                    fig.update_traces(
+                        hovertemplate='%{label}: %{value}<extra></extra>'
+                    )
+                    fig.update_layout(
+                        annotations=[
+                            dict(
+                                text=f"<b>{row['Category']}</b>",
+                                x=0.5,
+                                y=0.5,
+                                font_size=14,
+                                showarrow=False
+                            )
+                        ],
+                        showlegend=False,
+                        width=350,
+                        height=350
+                    )
+                    cols[j].plotly_chart(fig)
               
 
         if is_current_period:
             st.write("### Set Budget")
             budget_settings = {}
-            all_categories = sorted([cat for cat in current_df['category'].unique() if 'money transfer' not in cat.lower()])
+            all_categories = sorted(current_df['category'].unique())
             for category in all_categories:
-             default_value = existing_budgets.get(category, 0.0)
-            try:
-                input_value = st.text_input(
-                f"Budget for {category}",
-                value=str(int(default_value)) if default_value else ""
-                )
-                if input_value and input_value.replace(".", "").isdigit():
-                 budget_settings[category] = float(input_value)
-                elif input_value != "":
-                 st.error(f"Please enter a valid number for {category}")
-                 budget_settings[category] = default_value
-                else:
-                 budget_settings[category] = default_value
-            except ValueError:
-                st.error(f"Invalid input for {category}. Using default value.")
-                budget_settings[category] = default_value
+                default_value = existing_budgets.get(category, 0.0)
+                try:
+                    input_value = st.text_input(
+                        f"Budget for {category}",
+                        value=str(int(default_value)) if default_value else ""
+                    )
+                    if input_value and input_value.replace(".", "").isdigit():
+                        budget_settings[category] = float(input_value)
+                    elif input_value != "":
+                        st.error(f"Please enter a valid number for {category}")
+                        budget_settings[category] = default_value
+                    else:
+                        budget_settings[category] = default_value
+                except ValueError:
+                    st.error(f"Invalid input for {category}. Using default value.")
+                    budget_settings[category] = default_value
 
             if st.button("Save Budget"):
-             if not check_internet_connection():
-                return
-            budget_key = f"budget.{selected_year}_{selected_month}"
-            users_collection.update_one(
-                {"username": st.session_state["username"]},
-                {"$set": {budget_key: budget_settings}}
-            )
-            st.success("Budget saved successfully!")
-            time.sleep(2)
-            st.rerun()
+                if not check_internet_connection():
+                    return
+                budget_key = f"budget.{selected_year}_{selected_month}"
+                users_collection.update_one(
+                    {"username": st.session_state["username"]},
+                    {"$set": {budget_key: budget_settings}}
+                )
+                st.success("Budget saved successfully!")
+                time.sleep(2)
+                st.rerun()
         elif is_previous_period:
             st.warning("Budget settings for previous months are locked. You can only view the overview.")
 
