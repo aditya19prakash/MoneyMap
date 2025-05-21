@@ -4,7 +4,7 @@ from database import users_collection
 import time
 from transaction import format_amount
 from utility import check_internet_connection
-from ai_categorizer import train_model, load_model, predict_category
+# from ai_categorizer import train_model, load_model, predict_category
 
 CATEGORY_OPTIONS = [
     "Income", "Money Transfer", "Investment", "Groceries", "Food & Drinks",
