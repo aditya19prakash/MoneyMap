@@ -192,13 +192,11 @@ def portfolio():
         
         if not month_filtered_df.empty:
             # Prepare data for date-wise analysis
-            month_filtered_df['Credit_Amount'] = month_filtered_df['Credit'].fillna(0)
             month_filtered_df['Debit_Amount'] = month_filtered_df['Debit'].fillna(0)
             
             # Group by date
             daily_summary = month_filtered_df.groupby('Day').agg({
-                'Debit_Amount': 'sum',
-                'Credit_Amount': 'sum'
+                'Debit_Amount': 'sum'
             }).reset_index()
             
             daily_summary = daily_summary.sort_values('Day')
@@ -206,16 +204,17 @@ def portfolio():
                 lambda x: f"{selected_year}-{selected_month_num:02d}-{x:02d}"
             )
             
-            st.subheader(f"📈 Daily Transactions for {month_names[selected_month_num]} {selected_year}")
+            st.subheader(f"📈 Daily Spending for {month_names[selected_month_num]} {selected_year}")
             
             # Create bar chart for daily transactions
             fig_daily = px.bar(
                 daily_summary,
                 x='Date',
-                y=['Debit_Amount', 'Credit_Amount'],
-                labels={'Date': 'Date', 'value': 'Amount', 'variable': 'Transaction Type'},
-                title=f'Daily Spending and Income - {month_names[selected_month_num]} {selected_year}',
-                text_auto=True
+                y='Debit_Amount',
+                labels={'Date': 'Date', 'Debit_Amount': 'Amount Spent'},
+                title=f'Daily Spending - {month_names[selected_month_num]} {selected_year}',
+                text_auto=True,
+                color_discrete_sequence=['#FF6B6B']
             )
             
             fig_daily.update_traces(
@@ -246,42 +245,31 @@ def portfolio():
                     linecolor='rgb(204, 204, 204)',
                     linewidth=0.8,
                     tickfont=dict(size=12)
-                ),
-                legend=dict(
-                    title="Transaction Type",
-                    orientation="h",
-                    yanchor="bottom",
-                    y=1.02,
-                    xanchor="right",
-                    x=1
                 )
             )
             
             st.plotly_chart(fig_daily, use_container_width=True)
             
             # Summary statistics for the selected month
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3 = st.columns(3)
             
             total_debit = daily_summary['Debit_Amount'].sum()
-            total_credit = daily_summary['Credit_Amount'].sum()
-            net_amount = total_credit - total_debit
             avg_daily_spend = daily_summary['Debit_Amount'].mean()
+            max_daily_spend = daily_summary['Debit_Amount'].max()
             
             with col1:
                 st.metric("Total Spending", f"₹{total_debit:,.2f}")
             with col2:
-                st.metric("Total Income", f"₹{total_credit:,.2f}")
-            with col3:
-                st.metric("Net Amount", f"₹{net_amount:,.2f}", delta=f"{'Surplus' if net_amount >= 0 else 'Deficit'}")
-            with col4:
                 st.metric("Avg Daily Spend", f"₹{avg_daily_spend:,.2f}")
+            with col3:
+                st.metric("Max Daily Spend", f"₹{max_daily_spend:,.2f}")
             
             # Detailed transaction table for the selected month
             with st.expander(f"📋 Detailed Transactions - {month_names[selected_month_num]} {selected_year}"):
-                display_df = month_filtered_df[['Txn Date', 'Description', 'Category', 'Debit_Amount', 'Credit_Amount']].copy()
+                display_df = month_filtered_df[['Txn Date', 'Description', 'Category', 'Debit_Amount']].copy()
+                display_df = display_df[display_df['Debit_Amount'] > 0]  # Only show debit transactions
                 display_df = display_df.sort_values('Txn Date')
-                display_df['Debit_Amount'] = display_df['Debit_Amount'].apply(lambda x: f"₹{x:,.2f}" if x > 0 else "")
-                display_df['Credit_Amount'] = display_df['Credit_Amount'].apply(lambda x: f"₹{x:,.2f}" if x > 0 else "")
+                display_df['Debit_Amount'] = display_df['Debit_Amount'].apply(lambda x: f"₹{x:,.2f}")
                 
                 st.dataframe(
                     display_df,
@@ -289,8 +277,7 @@ def portfolio():
                         "Txn Date": "Date",
                         "Description": "Description",
                         "Category": "Category", 
-                        "Debit_Amount": "Debit",
-                        "Credit_Amount": "Credit"
+                        "Debit_Amount": "Amount Spent"
                     },
                     hide_index=True,
                     use_container_width=True
