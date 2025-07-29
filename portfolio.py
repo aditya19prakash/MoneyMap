@@ -191,6 +191,42 @@ def portfolio():
         month_filtered_df = filtered_df[filtered_df['Month'] == selected_month_num].copy()
         
         if not month_filtered_df.empty:
+            # Money range filter
+            st.subheader("💰 Filter by Amount Range")
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                min_amount = st.number_input(
+                    "Minimum Amount (₹)", 
+                    min_value=0.0, 
+                    value=0.0, 
+                    step=100.0,
+                    key=f"min_amount_{selected_year}_{selected_month_num}"
+                )
+            
+            with col2:
+                max_amount = st.number_input(
+                    "Maximum Amount (₹)", 
+                    min_value=0.0, 
+                    value=float(month_filtered_df['Debit'].fillna(0).max()) if not month_filtered_df['Debit'].isna().all() else 10000.0,
+                    step=100.0,
+                    key=f"max_amount_{selected_year}_{selected_month_num}"
+                )
+            
+            # Apply amount filter
+            if min_amount > 0 or max_amount < float(month_filtered_df['Debit'].fillna(0).max()):
+                amount_filtered_df = month_filtered_df[
+                    (month_filtered_df['Debit'].fillna(0) >= min_amount) & 
+                    (month_filtered_df['Debit'].fillna(0) <= max_amount)
+                ].copy()
+                
+                if amount_filtered_df.empty:
+                    st.warning(f"No transactions found in the amount range ₹{min_amount:,.2f} - ₹{max_amount:,.2f}")
+                    return
+                
+                # Show filter info
+                st.info(f"Showing {len(amount_filtered_df)} transactions between ₹{min_amount:,.2f} and ₹{max_amount:,.2f}")
+                month_filtered_df = amount_filtered_df
             # Prepare data for date-wise analysis
             month_filtered_df['Debit_Amount'] = month_filtered_df['Debit'].fillna(0)
             
