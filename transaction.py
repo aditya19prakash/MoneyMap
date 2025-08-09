@@ -4,6 +4,16 @@ from database import users_collection
 import random
 import pandas as pd
 from utility import check_internet_connection
+# At the start of show_transactions()
+if "removed_indexes_date" not in st.session_state:
+    st.session_state["removed_indexes_date"] = set()
+if "removed_indexes_account" not in st.session_state:
+    st.session_state["removed_indexes_account"] = set()
+if "filtered_by_date" not in st.session_state:
+    st.session_state["filtered_by_date"] = []
+if "filtered_by_account" not in st.session_state:
+    st.session_state["filtered_by_account"] = []
+
 def add_transaction():
     st.markdown("<h2 style='color: white;'>Add Transaction</h2>", unsafe_allow_html=True)
     if not check_internet_connection():
