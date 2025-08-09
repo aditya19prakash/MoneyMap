@@ -4,16 +4,6 @@ from database import users_collection
 import random
 import pandas as pd
 from utility import check_internet_connection
-# At the start of show_transactions()
-if "removed_indexes_date" not in st.session_state:
-    st.session_state["removed_indexes_date"] = set()
-if "removed_indexes_account" not in st.session_state:
-    st.session_state["removed_indexes_account"] = set()
-if "filtered_by_date" not in st.session_state:
-    st.session_state["filtered_by_date"] = []
-if "filtered_by_account" not in st.session_state:
-    st.session_state["filtered_by_account"] = []
-
 def add_transaction():
     st.markdown("<h2 style='color: white;'>Add Transaction</h2>", unsafe_allow_html=True)
     if not check_internet_connection():
@@ -75,6 +65,7 @@ def add_transaction():
             upsert=True
         )
         st.success("Transaction saved successfully!")
+
 def show_transactions():
     if "username" not in st.session_state:
         st.warning("Please log in first!")
@@ -82,7 +73,6 @@ def show_transactions():
     if not check_internet_connection():
         st.error("No internet connection. Please check your connection and try again.")
         return None
-
     username = st.session_state["username"]
     user = users_collection.find_one({"username": username}, {"transactions": 1, "_id": 0})
 
@@ -92,7 +82,6 @@ def show_transactions():
 
     transactions = user["transactions"]
 
-    # -------------------- FILTER BY DATE --------------------
     st.header("View Transactions by Date Range")
     col1, col2 = st.columns(2)
     with col1:
@@ -100,8 +89,9 @@ def show_transactions():
     with col2:
         end_date = st.date_input("End Date")
 
+    filtered_by_date = []
+       
     if st.button("Filter by Date"):
-        filtered_by_date = []
         for txn in transactions:
             txn_date = datetime.strptime(txn["Txn Date"], "%d-%m-%y").date()
             if start_date <= txn_date <= end_date:
@@ -110,60 +100,34 @@ def show_transactions():
                 clean_txn["Debit"] = format_amount(clean_txn.get("Debit"))
                 filtered_by_date.append(clean_txn)
 
-        filtered_by_date = sorted(filtered_by_date, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
-
-        st.session_state["filtered_by_date"] = filtered_by_date
-        st.session_state["removed_indexes_date"] = set()
-
-    if "filtered_by_date" in st.session_state:
-        remaining_txns = [
-            txn for i, txn in enumerate(st.session_state["filtered_by_date"])
-            if i not in st.session_state["removed_indexes_date"]
-        ]
-
-        if remaining_txns:
-            st.subheader("Transactions List")
-            header_cols = st.columns([1, 2, 2, 3, 1, 1, 2, 1])
-            headers = ["Date", "Account", "Category", "Description", "Debit", "Credit", "Payment", ""]
-            for col, head in zip(header_cols, headers):
-                col.markdown(f"**{head}**")
-
-            for idx, txn in enumerate(remaining_txns):
-                cols = st.columns([1, 2, 2, 3, 1, 1, 2, 1])
-                cols[0].write(txn["Txn Date"])
-                cols[1].write(txn["Account Name"])
-                cols[2].write(txn["Category"])
-                cols[3].write(txn["Description"])
-                cols[4].write(txn.get("Debit", ""))
-                cols[5].write(txn.get("Credit", ""))
-                cols[6].write(txn["Payment Method"])
-                if cols[7].button("Remove", key=f"remove_date_{idx}"):
-                    st.session_state["removed_indexes_date"].add(idx)
-
-            total_credit = sum(txn.get("Credit", 0) or 0 for txn in remaining_txns)
-            total_debit = sum(txn.get("Debit", 0) or 0 for txn in remaining_txns)
+        if filtered_by_date:
+            filtered_by_date = sorted(filtered_by_date, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
+            st.table(filtered_by_date)
+            total_credit = sum(txn.get("Credit", 0) or 0 for txn in filtered_by_date)
+            total_debit = sum(txn.get("Debit", 0) or 0 for txn in filtered_by_date)
+            
             st.write(f"Transaction between {start_date} and {end_date}:")
             st.write(f"Total Credit: ₹{total_credit:,}")
             st.write(f"Total Debit: ₹{total_debit:,}")
-
-            df = pd.DataFrame(remaining_txns)
+            df = pd.DataFrame(filtered_by_date)
             csv = df.to_csv(index=False).encode('utf-8')
-            file_name = f"transactions_{start_date}_to_{end_date}.csv"
+            file_name=f"transactions_{start_date}_to_{end_date}.csv"
             st.download_button("Download CSV", data=csv, file_name=file_name, mime="text/csv")
         else:
-            st.info("All transactions removed from current date range view.")
+            st.info("No transactions found for the selected dates!")
 
-    # -------------------- FILTER BY ACCOUNT --------------------
     st.markdown("---")
     st.header("View Transactions by Account Name")
     account_names = list({txn.get('Account Name', 'Unknown') for txn in transactions})
     selected_account = st.selectbox("Select Account", account_names)
-
+    
     col1, col2 = st.columns(2)
     with col1:
         acc_start_date = st.date_input("Start Date (Account)")
     with col2:
         acc_end_date = st.date_input("End Date (Account)")
+
+    filtered_by_account = []
 
     if st.button("Filter by Account"):
         filtered_by_account = [
@@ -172,54 +136,26 @@ def show_transactions():
                 "Credit": format_amount(txn.get("Credit")),
                 "Debit": format_amount(txn.get("Debit"))
             }
-            for txn in transactions
-            if txn.get("Account Name") == selected_account
+            for txn in transactions 
+            if txn.get("Account Name") == selected_account 
             and acc_start_date <= datetime.strptime(txn["Txn Date"], "%d-%m-%y").date() <= acc_end_date
         ]
-
-        filtered_by_account = sorted(filtered_by_account, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
-
-        st.session_state["filtered_by_account"] = filtered_by_account
-        st.session_state["removed_indexes_account"] = set()
-
-    if "filtered_by_account" in st.session_state:
-        remaining_txns = [
-            txn for i, txn in enumerate(st.session_state["filtered_by_account"])
-            if i not in st.session_state["removed_indexes_account"]
-        ]
-
-        if remaining_txns:
-            st.subheader(f"Transactions for {selected_account}")
-            header_cols = st.columns([1, 2, 2, 3, 1, 1, 2, 1])
-            headers = ["Date", "Account", "Category", "Description", "Debit", "Credit", "Payment", ""]
-            for col, head in zip(header_cols, headers):
-                col.markdown(f"**{head}**")
-
-            for idx, txn in enumerate(remaining_txns):
-                cols = st.columns([1, 2, 2, 3, 1, 1, 2, 1])
-                cols[0].write(txn["Txn Date"])
-                cols[1].write(txn["Account Name"])
-                cols[2].write(txn["Category"])
-                cols[3].write(txn["Description"])
-                cols[4].write(txn.get("Debit", ""))
-                cols[5].write(txn.get("Credit", ""))
-                cols[6].write(txn["Payment Method"])
-                if cols[7].button("Remove", key=f"remove_acc_{idx}"):
-                    st.session_state["removed_indexes_account"].add(idx)
-
-            total_credit = sum(txn.get("Credit", 0) or 0 for txn in remaining_txns)
-            total_debit = sum(txn.get("Debit", 0) or 0 for txn in remaining_txns)
+        if filtered_by_account:
+            filtered_by_account = sorted(filtered_by_account, key=lambda x: datetime.strptime(x["Txn Date"], "%d-%m-%y"))
+            st.table(filtered_by_account)
+            df = pd.DataFrame(filtered_by_account)
+            df['Id'] = df['Id'].astype(str)  # Convert Id column to string
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("Download CSV (Account)", data=csv, file_name=f"{selected_account}_transaction.csv", mime="text/csv")
+            # Calculate total credit and debit
+            total_credit = sum(txn.get("Credit", 0) or 0 for txn in filtered_by_account)
+            total_debit = sum(txn.get("Debit", 0) or 0 for txn in filtered_by_account)
+            
             st.write(f"For account '{selected_account}' between {acc_start_date} and {acc_end_date}:")
             st.write(f"Total Credit: ₹{total_credit:,}")
             st.write(f"Total Debit: ₹{total_debit:,}")
-
-            df = pd.DataFrame(remaining_txns)
-            df['Id'] = df['Id'].astype(str)
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("Download CSV (Account)", data=csv, file_name=f"{selected_account}_transaction.csv", mime="text/csv")
         else:
-            st.info(f"All transactions removed from '{selected_account}' view.")
-
+            st.info(f"No transactions found for account '{selected_account}'.")
 
 def format_amount(amount):
     if pd.isna(amount):
